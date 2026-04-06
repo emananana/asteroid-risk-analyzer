@@ -14,24 +14,50 @@ params = {
 
 response = requests.get(url, params=params, timeout=30)
 response.raise_for_status()
-
 data = response.json()
 
-print("Top-level keys:", data.keys())
-print("Dates returned:", list(data["near_earth_objects"].keys()))
+asteroid_rows = []
 
-first_date = list(data["near_earth_objects"].keys())[0]
-first_asteroid = data["near_earth_objects"][first_date][0]
+near_earth_objects = data["near_earth_objects"]
 
-print("\nSample asteroid:")
-print("Name:", first_asteroid["name"])
-print("Hazardous:", first_asteroid["is_potentially_hazardous_asteroid"])
+for date in near_earth_objects:
+    asteroids_for_day = near_earth_objects[date]
 
-diameter_info = first_asteroid["estimated_diameter"]["meters"]
-print("Estimated diameter min (m):", diameter_info["estimated_diameter_min"])
-print("Estimated diameter max (m):", diameter_info["estimated_diameter_max"])
+    for asteroid in asteroids_for_day:
+        diameter_info = asteroid["estimated_diameter"]["meters"]
+        diameter_min_m = diameter_info["estimated_diameter_min"]
+        diameter_max_m = diameter_info["estimated_diameter_max"]
 
-approach = first_asteroid["close_approach_data"][0]
-print("Relative velocity (km/h):", approach["relative_velocity"]["kilometers_per_hour"])
-print("Miss distance (km):", approach["miss_distance"]["kilometers"])
-print("Orbiting body:", approach["orbiting_body"])
+        close_approach_data = asteroid["close_approach_data"]
+
+        if len(close_approach_data) == 0:
+            continue
+
+        approach = close_approach_data[0]
+
+        velocity_kph = float(approach["relative_velocity"]["kilometers_per_hour"])
+        miss_distance_km = float(approach["miss_distance"]["kilometers"])
+        close_approach_date = approach["close_approach_date"]
+
+        row = {
+            "name": asteroid["name"],
+            "hazardous": int(asteroid["is_potentially_hazardous_asteroid"]),
+            "diameter_min_m": diameter_min_m,
+            "diameter_max_m": diameter_max_m,
+            "velocity_kph": velocity_kph,
+            "miss_distance_km": miss_distance_km,
+            "close_approach_date": close_approach_date
+        }
+
+        asteroid_rows.append(row)
+
+df = pd.DataFrame(asteroid_rows)
+
+print("\nFirst 5 rows:")
+print(df.head())
+
+print("\nDataframe shape:")
+print(df.shape)
+
+print("\nColumn names:")
+print(df.columns.tolist())
