@@ -2,6 +2,10 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
 API_KEY = "DEMO_KEY"
 START_DATE = "2026-04-01"
 END_DATE = "2026-04-06"
@@ -70,11 +74,41 @@ non_hazardous_df = df[df["hazardous"] == 0]
 plt.figure(figsize=(10, 6))
 plt.scatter(non_hazardous_df["miss_distance_km"], non_hazardous_df["diameter_max_m"], label="Not Hazardous")
 plt.scatter(hazardous_df["miss_distance_km"], hazardous_df["diameter_max_m"], label="Hazardous")
-
 plt.xlabel("Miss Distance (km)")
 plt.ylabel("Max Estimated Diameter (m)")
 plt.title("Asteroid Risk: Size vs Distance from Earth")
 plt.legend()
 plt.tight_layout()
 plt.savefig("asteroid_risk_plot.png")
+
+# ------------------------------------------------------ #
+# Machine Learning Model to Predict Hazardous Asteroids  #
+# ------------------------------------------------------ #
+
+feature_columns = ["diameter_max_m", "velocity_kph", "miss_distance_km"]
+X = df[feature_columns]
+y = df["hazardous"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+model = LogisticRegression(max_iter=1000, class_weight='balanced')
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+print("\nModel Accuracy:")
+print(accuracy_score(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, zero_division=0))
+
+results_df = X_test.copy()
+results_df["actual_hazardous"] = y_test.values
+results_df["predicted_hazardous"] = y_pred
+
+print("\nPrediction Results:")
+print(results_df)
+
 plt.show()
