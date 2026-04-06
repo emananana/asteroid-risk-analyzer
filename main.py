@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import matplotlib.pyplot as plt
 
 API_KEY = "DEMO_KEY"
 START_DATE = "2026-04-01"
@@ -17,7 +18,6 @@ response.raise_for_status()
 data = response.json()
 
 asteroid_rows = []
-
 near_earth_objects = data["near_earth_objects"]
 
 for date in near_earth_objects:
@@ -29,7 +29,6 @@ for date in near_earth_objects:
         diameter_max_m = diameter_info["estimated_diameter_max"]
 
         close_approach_data = asteroid["close_approach_data"]
-
         if len(close_approach_data) == 0:
             continue
 
@@ -59,5 +58,23 @@ print(df.head())
 print("\nDataframe shape:")
 print(df.shape)
 
-print("\nColumn names:")
-print(df.columns.tolist())
+print("\nHazardous value counts:")
+print(df["hazardous"].value_counts())
+
+print("\nSummary statistics:")
+print(df[["diameter_max_m", "velocity_kph", "miss_distance_km"]].describe())
+
+hazardous_df = df[df["hazardous"] == 1]
+non_hazardous_df = df[df["hazardous"] == 0]
+
+plt.figure(figsize=(10, 6))
+plt.scatter(non_hazardous_df["miss_distance_km"], non_hazardous_df["diameter_max_m"], label="Not Hazardous")
+plt.scatter(hazardous_df["miss_distance_km"], hazardous_df["diameter_max_m"], label="Hazardous")
+
+plt.xlabel("Miss Distance (km)")
+plt.ylabel("Max Estimated Diameter (m)")
+plt.title("Asteroid Risk: Size vs Distance from Earth")
+plt.legend()
+plt.tight_layout()
+plt.savefig("asteroid_risk_plot.png")
+plt.show()
