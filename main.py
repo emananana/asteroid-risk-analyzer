@@ -93,7 +93,7 @@ plt.ylabel("Max Estimated Diameter (m)")
 plt.title("Asteroid Risk: Size vs Distance from Earth")
 plt.legend()
 plt.tight_layout()
-plt.savefig("asteroid_risk_plot.png")
+plt.savefig("asteroid_risk_plot_v2.png")
 
 feature_columns = ["diameter_max_m", "velocity_kph", "miss_distance_km"]
 X = df[feature_columns]

@@ -18,7 +18,7 @@ Note: Dataset was initially imbalanced, addressed using class-weighted logistic 
 
 ## Visualization
 
-![Asteroid Risk Plot](asteroid_risk_plot.png)
+![Asteroid Risk Plot](asteroid_risk_plot_v2.png)
 
 ## Key Insight
 
